@@ -1,0 +1,22 @@
+{% ckan_extends %}
+
+{% set contributors = h.contributor_details(g.pkg_dict.get('contributors', [])).values() | sort(attribute='order') %}
+{% set limit = 3 %}
+
+{% block contributors_row %}
+    <tr>
+        <th scope="row" class="dataset-label">{{ _("Contributors") }}</th>
+        <td class="dataset-details">
+            {% for co in contributors[:limit] %}
+                <div>
+                    {{ co['surname'] }}, {{ co['given_names'] | truncate(2, true, '.') }}{% if co['orcid'] %}
+                    (<a href="https://orcid.org/{{ co['orcid'] }}"><i class="fab fa-orcid"></i>
+                    {{ co['orcid'] }}</a>){% endif %}{% if contributors | length > limit or not loop.last %};{% endif %}
+                </div>
+            {% endfor %}
+            {% if contributors | length > limit %}
+                <span>et al.</span>
+            {% endif %}
+        </td>
+    </tr>
+{% endblock %}
