@@ -79,7 +79,7 @@ Name|Description|Options
 ## Optional
 
 Name|Description|Options|Default
---|--|--
+--|--|--|--
 `ckanext.orcid_datasets.debug`|If true, use sandbox.orcid.org (for testing)|True/False|True
 
 # Usage
