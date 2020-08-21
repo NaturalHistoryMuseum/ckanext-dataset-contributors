@@ -2,8 +2,8 @@
 
 # ckanext-orcid-datasets
 
-[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-orcid-datasets/master.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-orcid-datasets)
-[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-orcid-datasets/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-orcid-datasets)
+[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-orcid-datasets/main.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-orcid-datasets)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-orcid-datasets/main.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-orcid-datasets)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.0a-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 
 _A CKAN extension that adds ORCID contributors to datasets._
