@@ -86,7 +86,7 @@ class TestOrcidApi(TestBase):
         self.config.reset()
 
     def test_search_surname(self):
-        api = OrcidApi()
+        api = helpers.skip_without_credentials()
         results = api.search(surname_q=u'Portal')
         records = results[u'result']
         nose.tools.assert_less_equal(len(records), 10)
@@ -98,7 +98,7 @@ class TestOrcidApi(TestBase):
             nose.tools.assert_in(helpers.sandbox_portal_orcid, orcids)
 
     def test_search_orcid(self):
-        api = OrcidApi()
+        api = helpers.skip_without_credentials()
         results = api.search(orcid_q=helpers.sandbox_portal_orcid)
         records = results[u'result']
         nose.tools.assert_equal(len(records), 1)
@@ -107,7 +107,7 @@ class TestOrcidApi(TestBase):
         nose.tools.assert_in(helpers.sandbox_portal_orcid, orcids)
 
     def test_search_surname_and_orcid(self):
-        api = OrcidApi()
+        api = helpers.skip_without_credentials()
         results = api.search(surname_q=u'Portal', orcid_q=helpers.sandbox_portal_orcid)
         records = results[u'result']
         nose.tools.assert_equal(len(records), 1)
@@ -116,7 +116,7 @@ class TestOrcidApi(TestBase):
         nose.tools.assert_in(helpers.sandbox_portal_orcid, orcids)
 
     def test_read_orcid_record(self):
-        api = OrcidApi()
+        api = helpers.skip_without_credentials()
         record = api.read(helpers.sandbox_portal_orcid)
         nose.tools.assert_equal(record[u'orcid-identifier'][u'path'],
                                 helpers.sandbox_portal_orcid)
@@ -124,7 +124,7 @@ class TestOrcidApi(TestBase):
                                 u'Data')
 
     def test_orcid_record_as_contributor(self):
-        api = OrcidApi()
+        api = helpers.skip_without_credentials()
         record = api.read(helpers.sandbox_portal_orcid)
         contrib_record = api.as_contributor_record(record)
         nose.tools.assert_equal(contrib_record[u'orcid'], helpers.sandbox_portal_orcid)
