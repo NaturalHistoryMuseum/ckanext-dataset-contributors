@@ -15,3 +15,13 @@ def contributor_show(context, data_dict):
     return {
         u'success': True
         }
+
+
+@toolkit.auth_allow_anonymous_access
+def contributor_autocomplete(context, data_dict):
+    '''
+    Allow for everyone.
+    '''
+    return {
+        u'success': True
+        }

@@ -12,6 +12,8 @@ from ckanext.orcid_datasets.lib.orcid_api import OrcidApi
 from ckan.plugins import toolkit
 
 sandbox_portal_orcid = u'0000-0002-6856-1627'
+sandbox_portal_surname = u'Portal'
+sandbox_portal_given = u'Data'
 
 
 def skip_without_credentials():
@@ -29,3 +31,16 @@ def skip_without_credentials():
         raise SkipTest(message)
     else:
         return api
+
+
+contributor1 = {
+    u'surname': u'Contributor1',
+    u'given_names': u'A',
+    u'orcid': sandbox_portal_orcid
+    }
+
+contributor2 = {
+    u'surname': u'Contributor2',
+    u'given_names': u'B',
+    u'orcid': u'0000-0000-0000-0000'
+    }

@@ -5,9 +5,11 @@
 # Created by the Natural History Museum in London, UK
 
 
+import json
+
 import mock
 import nose
-from ckanext.orcid_datasets.lib import template_helpers
+from ckanext.orcid_datasets.lib import template_helpers, validators
 from ckanext.orcid_datasets.model.crud import ContributorQ
 from ckantest.models import TestBase
 
@@ -75,3 +77,32 @@ class TestTemplateHelpers(TestBase):
         with mock.patch('ckanext.orcid_datasets.lib.template_helpers.toolkit.check_access',
                         _as_anon):
             nose.tools.assert_false(template_helpers.can_edit())
+
+    def test_get_validators(self):
+        nose.tools.assert_equal(toolkit.get_validator(u'is_serialised_list'),
+                                validators.is_serialised_list)
+
+    def test_is_serialised_list(self):
+        test_list = [1, 2, 3]
+        with nose.tools.assert_raises(toolkit.Invalid):
+            validators.is_serialised_list(test_list)
+
+        test_dict = {
+            'a': 'b'
+            }
+        with nose.tools.assert_raises(toolkit.Invalid):
+            validators.is_serialised_list(test_dict)
+
+        serialised_dict = json.dumps(test_dict)
+        with nose.tools.assert_raises(toolkit.Invalid):
+            validators.is_serialised_list(serialised_dict)
+
+        just_a_string = 'hello'
+        with nose.tools.assert_raises(toolkit.Invalid):
+            validators.is_serialised_list(just_a_string)
+
+        empty_string = ''
+        nose.tools.assert_is_none(validators.is_serialised_list(empty_string))
+
+        serialised_list = json.dumps(test_list)
+        nose.tools.assert_equal(validators.is_serialised_list(serialised_list), serialised_list)

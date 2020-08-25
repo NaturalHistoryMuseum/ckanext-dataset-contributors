@@ -4,13 +4,15 @@
 # This file is part of ckanext-orcid-datasets
 # Created by the Natural History Museum in London, UK
 
+from ckan.authz import is_sysadmin
+
 
 def contributor_update(context, data_dict):
     '''
-    Only allow for sysadmins (who skip this method, so just return False).
+    Only allow for sysadmins (who usually skip this method, except in tests).
     '''
     return {
-        u'success': False
+        u'success': is_sysadmin(context.get(u'user'))
         }
 
 

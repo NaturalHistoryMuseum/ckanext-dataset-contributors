@@ -5,11 +5,9 @@
 # Created by the Natural History Museum in London, UK
 
 
-import json
-
 from ckanext.orcid_datasets.lib.orcid_api import OrcidApi
-from ckanext.orcid_datasets.model.crud import ContributorQ
 from ckanext.orcid_datasets.model.contributor import Contributor
+from ckanext.orcid_datasets.model.crud import ContributorQ
 from sqlalchemy import and_
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -17,30 +15,24 @@ from ckan.model import Session
 from ckan.plugins import toolkit
 
 
-@toolkit.chained_action
-def package_show(next_action, context, data_dict):
-    '''
-
-    :param context:
-    :param data_dict:
-
-    '''
-    return next_action(context, data_dict)
-
-
 def contributor_show(context, data_dict):
     contributor_id = data_dict.get(u'id', None)
     if contributor_id is None or contributor_id == u'':
-        return
-    return ContributorQ.read(contributor_id).as_dict()
+        raise toolkit.ObjectNotFound(toolkit._(u'Contributor ID not supplied.'))
+    contributor = ContributorQ.read(contributor_id)
+    if contributor is not None:
+        return contributor.as_dict()
+    else:
+        raise toolkit.ObjectNotFound(toolkit._(u'Contributor ID not found.'))
 
 
 def contributor_autocomplete(context, data_dict):
-    include_orcid = data_dict.pop('include_orcid')
+    include_orcid = data_dict.pop('include_orcid', False)
 
     filters = []
     for k, v in data_dict.items():
-        if v is not None and hasattr(Contributor, k) and isinstance(getattr(Contributor, k), InstrumentedAttribute):
+        if v is not None and hasattr(Contributor, k) and isinstance(getattr(Contributor, k),
+                                                                    InstrumentedAttribute):
             filters.append(getattr(Contributor, k).ilike(u'%' + v + u'%'))
 
     portal_results = Session.query(Contributor).filter(and_(*filters)).limit(10).all()

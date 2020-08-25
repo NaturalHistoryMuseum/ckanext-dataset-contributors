@@ -17,5 +17,8 @@ def contributor_create(context, data_dict):
     :return:
     '''
     toolkit.check_access(u'contributor_create', context, data_dict)
-    del data_dict[u'id']
+    try:
+        del data_dict[u'id']
+    except KeyError:
+        pass
     return ContributorQ.create(**data_dict).as_dict()

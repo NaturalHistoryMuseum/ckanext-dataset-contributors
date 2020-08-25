@@ -29,7 +29,6 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             u'contributor_create': create.contributor_create,
             u'contributor_show': get.contributor_show,
             u'contributor_autocomplete': get.contributor_autocomplete,
-            u'package_show': get.package_show,
             u'contributor_update': update.contributor_update,
             u'contributor_orcid_update': update.contributor_orcid_update,
             u'package_update': update.package_update
@@ -42,6 +41,7 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         auth = {
             u'contributor_create': create.contributor_create,
             u'contributor_show': get.contributor_show,
+            u'contributor_autocomplete': get.contributor_autocomplete,
             u'contributor_update': update.contributor_update,
             u'contributor_orcid_update': update.contributor_orcid_update
             }
@@ -86,9 +86,7 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     # IValidators
     def get_validators(self):
         return {
-            'is_list': validators.is_list,
-            'json_dump': validators.json_dump,
-            'json_load': validators.json_load
+            'is_serialised_list': validators.is_serialised_list
             }
 
     # ITemplateHelpers
@@ -103,26 +101,26 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def create_package_schema(self, schema=None):
         ignore_missing = toolkit.get_validator(u'ignore_missing')
         convert_to_extras = toolkit.get_converter(u'convert_to_extras')
-        is_list = toolkit.get_validator(u'is_list')
+        is_serialised_list = toolkit.get_validator(u'is_serialised_list')
         if schema is None:
             schema = super(OrcidDatasetsPlugin, self).create_package_schema()
-        schema[u'contributors'] = [ignore_missing, is_list, convert_to_extras]
+        schema[u'contributors'] = [ignore_missing, is_serialised_list, convert_to_extras]
         return schema
 
     def show_package_schema(self, schema=None):
         ignore_missing = toolkit.get_validator(u'ignore_missing')
         convert_from_extras = toolkit.get_converter(u'convert_from_extras')
-        is_list = toolkit.get_validator(u'is_list')
+        is_serialised_list = toolkit.get_validator(u'is_serialised_list')
         if schema is None:
             schema = super(OrcidDatasetsPlugin, self).show_package_schema()
-        schema[u'contributors'] = [convert_from_extras, ignore_missing, is_list]
+        schema[u'contributors'] = [convert_from_extras, ignore_missing, is_serialised_list]
         return schema
 
     def update_package_schema(self, schema=None):
         ignore_missing = toolkit.get_validator(u'ignore_missing')
         convert_to_extras = toolkit.get_converter(u'convert_to_extras')
-        is_list = toolkit.get_validator(u'is_list')
+        is_serialised_list = toolkit.get_validator(u'is_serialised_list')
         if schema is None:
             schema = super(OrcidDatasetsPlugin, self).update_package_schema()
-        schema[u'contributors'] = [ignore_missing, is_list, convert_to_extras]
+        schema[u'contributors'] = [ignore_missing, is_serialised_list, convert_to_extras]
         return schema

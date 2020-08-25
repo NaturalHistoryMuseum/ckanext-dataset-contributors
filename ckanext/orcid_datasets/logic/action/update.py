@@ -33,14 +33,14 @@ def package_update(next_action, context, data_dict):
         if c.get(u'orcid', None) is not None:
             # if that orcid already exists in the database, just add that
             in_database = ContributorQ.read_orcid(c.get(u'orcid'))
-            if len(in_database) > 0:
-                new_contributor = in_database[0].as_dict()
+            if in_database is not None:
+                new_contributor = in_database.as_dict()
         if new_contributor is None:
             new_contributor = toolkit.get_action(u'contributor_create')(context, c)
         new_contributor[u'order'] = c.get(u'order', len(package_contributors))
         package_contributors.append(new_contributor)
 
-    contributor_ids = [c[u'id'] for c in sorted(package_contributors, key=lambda x: x[u'order'])]
+    contributor_ids = [c[u'id'] for c in sorted(package_contributors, key=lambda x: x.get(u'order', 0))]
     data_dict[u'contributors'] = json.dumps(contributor_ids)
 
     return next_action(context, data_dict)
@@ -55,7 +55,7 @@ def contributor_update(context, data_dict):
     '''
     toolkit.check_access(u'contributor_update', context, data_dict)
 
-    contributor_id = data_dict.pop(u'id', None)
+    contributor_id = data_dict.get(u'id', None)
     if contributor_id is None:
         return
     return ContributorQ.update(contributor_id, **data_dict).as_dict()

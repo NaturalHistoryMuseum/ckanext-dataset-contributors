@@ -13,6 +13,9 @@ from ckan.plugins import toolkit
 
 
 class ContributorQ(object):
+    # model, for convenience
+    m = Contributor
+
     @classmethod
     def _columns(cls, **kwargs):
         return {c.name: kwargs.get(c.name) for c in contributor_table.c if c.name in kwargs}
@@ -31,7 +34,7 @@ class ContributorQ(object):
 
     @classmethod
     def read_orcid(cls, orcid):
-        return Session.query(Contributor).filter(Contributor.orcid == orcid).all()
+        return Session.query(Contributor).filter(Contributor.orcid == orcid).first()
 
     @classmethod
     def search(cls, query):
