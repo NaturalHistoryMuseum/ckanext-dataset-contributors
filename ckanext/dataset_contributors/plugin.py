@@ -131,8 +131,11 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             for contributor in metadata[u'contributors']:
                 contributor[u'@contributorType'] = u'Researcher'
                 if u'nameIdentifier' in contributor:
-                    contributor[u'nameIdentifier']['@schemeURI'] = 'http://orcid.org'
-                    contributor[u'nameIdentifier']['@nameIdentifierScheme'] = 'ORCID'
+                    contributor[u'nameIdentifier'] = {
+                        u'#text': contributor[u'nameIdentifier'],
+                        '@schemeURI': 'http://orcid.org',
+                        '@nameIdentifierScheme': 'ORCID'
+                        }
                 contributor_xml.append(contributor)
             xml_dict[u'resource'][u'contributors'] = {
                 u'contributor': contributor_xml,

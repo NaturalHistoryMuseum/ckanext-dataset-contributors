@@ -106,7 +106,7 @@
 }
 
 .hideme {
-    display: none;
+    display: none !important;
 }
 
 #contributor-search-loading {
