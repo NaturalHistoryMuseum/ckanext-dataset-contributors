@@ -1,12 +1,12 @@
 <img src=".github/nhm-logo.svg" align="left" width="150px" height="100px" hspace="40"/>
 
-# ckanext-orcid-datasets
+# ckanext-dataset-contributors
 
-[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-orcid-datasets/main.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-orcid-datasets)
-[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-orcid-datasets/main.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-orcid-datasets)
+[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-dataset-contributors/main.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-dataset-contributors)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-dataset-contributors/main.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-dataset-contributors)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.0a-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 
-_A CKAN extension that adds ORCID contributors to datasets._
+_A CKAN extension that links contributors and their ORCIDs to datasets._
 
 
 # Overview
@@ -33,7 +33,7 @@ Path variables used below:
 
   ```bash
   cd $INSTALL_FOLDER/src
-  git clone https://github.com/NaturalHistoryMuseum/ckanext-orcid-datasets.git
+  git clone https://github.com/NaturalHistoryMuseum/ckanext-dataset-contributors.git
   ```
 
 2. Activate the virtual env:
@@ -45,42 +45,63 @@ Path variables used below:
 3. Install the requirements from requirements.txt:
 
   ```bash
-  cd $INSTALL_FOLDER/src/ckanext-orcid-datasets
+  cd $INSTALL_FOLDER/src/ckanext-dataset-contributors
   pip install -r requirements.txt
   ```
 
 4. Run setup.py:
 
   ```bash
-  cd $INSTALL_FOLDER/src/ckanext-orcid-datasets
+  cd $INSTALL_FOLDER/src/ckanext-dataset-contributors
   python setup.py develop
   ```
 
-5. Add 'orcid_datasets' to the list of plugins in your `$CONFIG_FILE`:
+5. Add 'dataset_contributors' to the list of plugins in your `$CONFIG_FILE`:
 
   ```ini
-  ckan.plugins = ... orcid_datasets
+  ckan.plugins = ... dataset_contributors
   ```
 
 ## Additional steps
+
+### SOLR Faceting
+You will need to add a `contributors` field to your `schema.xml` for faceting to work.
+
+```xml
+<schema>
+    <fields>
+        <...>
+        <field name="contributors" type="string" indexed="true" stored="true" multiValued="true"/>
+        <...>
+    </fields>
+<...>
+<copyField source="contributors" dest="text"/>
+</schema>
+```
+
+Add the above lines to your SOLR `schema.xml` and restart SOLR. You will also have to enable the config option to see this in the UI (see below).
+
+### FontAwesome
 The templates in this plugin use the ORCID icon from [fontawesome 5.11+](https://github.com/FortAwesome/Font-Awesome/releases/tag/5.11.0). To use them, you'll have to make fontawesome 5.11+ available (e.g. in your main theme plugin).
 
 # Configuration
 
 These are the options that can be specified in your .ini config file.
+NB: setting `ckanext.dataset_contributors.debug` to `True` means that the API accesses [sandbox.orcid.org](https://sandbox.orcid.org) instead of [orcid.org](https://orcid.org). Although both run by the ORCID organisation, these are _different websites_ and you will need a separate account/set of credentials for each. It is also worth noting that you will not have access to the full set of authors on the sandbox.
 
 ## API credentials [REQUIRED]
 
 Name|Description|Options
 --|--|--
-`ckanext.orcid_datasets.key`|Your ORCID API client ID/key||
-`ckanext.orcid_datasets.secret`|Your ORCID API client secret||
+`ckanext.dataset_contributors.orcid_key`|Your ORCID API client ID/key||
+`ckanext.dataset_contributors.orcid_secret`|Your ORCID API client secret||
 
 ## Optional
 
 Name|Description|Options|Default
 --|--|--|--
-`ckanext.orcid_datasets.debug`|If true, use sandbox.orcid.org (for testing)|True/False|True
+`ckanext.dataset_contributors.debug`|If true, use sandbox.orcid.org (for testing)|True/False|True
+`ckanext.dataset_contributors.enable_faceting`|If true, enable filtering datasets by contributor names (requires change to SOLR schema)|True/False|False
 
 # Usage
 
@@ -146,13 +167,19 @@ toolkit.get_action('contributor_orcid_update')({}, data_dict)
 1. `pull`: update contributor records with data pulled from the ORCID API.
 Specific ORCIDs to be updated can be passed as arguments, or the command can be used by itself to update all records with an associated ORCID.
 ```sh
-paster --plugin=ckanext-orcid-datasets orcid-sync pull [ORCID1] [ORCID2] [...] -c $CONFIG_FILE
+paster --plugin=ckanext-dataset-contributors orcid-sync pull [ORCID1] [ORCID2] [...] -c $CONFIG_FILE
 
 # e.g. update records with ORCIDs 0000-0000-0000-0000 and 1111-1111-1111-1111
-paster --plugin=ckanext-orcid-datasets orcid-sync pull 0000-0000-0000-0000 1111-1111-1111-1111 -c $CONFIG_FILE
+paster --plugin=ckanext-dataset-contributors orcid-sync pull 0000-0000-0000-0000 1111-1111-1111-1111 -c $CONFIG_FILE
 
 # e.g. update all records with an ORCID
-paster --plugin=ckanext-orcid-datasets orcid-sync pull -c $CONFIG_FILE
+paster --plugin=ckanext-dataset-contributors orcid-sync pull -c $CONFIG_FILE
+```
+
+### `contributor-migrate`
+1. `existing`: attempt to migrate contributors listed as `package_extras` to the new format. Unlikely to be relevant in the majority of cases. **Requires manual input; do not use in unattended scripts**.
+```sh
+paster --plugin=ckanext-dataset-contributors migrate-contributors existing -c $CONFIG_FILE
 ```
 
 ## Templates
@@ -175,5 +202,5 @@ And this block to `theme/templates/package/snippets/additional_info.html`:
 
 To run the tests, use nosetests inside your virtualenv. The `--nocapture` flag will allow you to see the debug statements.
 ```bash
-nosetests --ckan --with-pylons=$TEST_CONFIG_FILE --where=$INSTALL_FOLDER/src/ckanext-orcid-datasets --nologcapture --nocapture
+nosetests --ckan --with-pylons=$TEST_CONFIG_FILE --where=$INSTALL_FOLDER/src/ckanext-dataset-contributors --nologcapture --nocapture
 ```

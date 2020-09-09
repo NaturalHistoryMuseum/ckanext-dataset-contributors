@@ -5,7 +5,7 @@ python:
   - "2.7"
 
 install:
-  - sh ckanext/orcid_datasets/tests/bin/build.sh
+  - sh ckanext/dataset_contributors/tests/bin/build.sh
 
 services:
   - redis-server
@@ -14,6 +14,6 @@ services:
 addons:
   postgresql: "9.4"
 
-script: coverage run --source=ckanext.orcid_datasets setup.py nosetests --ckan --with-pylons=ckanext/orcid_datasets/tests/bin/test.ini --nologcapture --debug=ckantest,ckanext.orcid_datasets --rednose
+script: coverage run --source=ckanext.dataset_contributors setup.py nosetests --ckan --with-pylons=ckanext/dataset_contributors/tests/bin/test.ini --nologcapture --debug=ckantest,ckanext.dataset_contributors --rednose
 
 after_success: coveralls
