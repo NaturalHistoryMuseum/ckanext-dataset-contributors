@@ -181,6 +181,7 @@ paster --plugin=ckanext-dataset-contributors orcid-sync pull -c $CONFIG_FILE
 ```sh
 paster --plugin=ckanext-dataset-contributors migrate-contributors existing -c $CONFIG_FILE
 ```
+The `spacy` package is required to run this command. This is not installed by default, but instead is listed in `dev-requirements.txt` (along with the version of `requests` it requires).
 
 ## Templates
 

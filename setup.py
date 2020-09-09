@@ -32,7 +32,6 @@ setup(
     zip_safe=False,
     install_requires=[
         u'orcid',
-        u'spacy',
         u'unidecode'
         ],
     entry_points= \
