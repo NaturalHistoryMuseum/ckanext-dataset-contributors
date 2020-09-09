@@ -31,7 +31,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        u'orcid'
+        u'orcid',
+        u'spacy',
+        u'unidecode'
         ],
     entry_points= \
         u'''
@@ -40,5 +42,6 @@ setup(
 
         [paste.paster_command]
             orcid-sync=ckanext.orcid_datasets.commands.orcid_sync:OrcidSyncCommand
+            contributor-migrate=ckanext.orcid_datasets.commands.migrate:ContributorMigrateCommand
         ''',
     )

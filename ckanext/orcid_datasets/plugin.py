@@ -6,9 +6,11 @@
 
 from ckanext.orcid_datasets.lib import template_helpers, validators
 from ckanext.orcid_datasets.model import contributor as contributor_model
+from ckanext.doi.interfaces import IDoi
+import json
 
 from ckan import model
-from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
+from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit, PluginImplementations
 
 
 class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
@@ -18,7 +20,10 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     implements(interfaces.IAuthFunctions, inherit=True)
     implements(interfaces.IConfigurable)
     implements(interfaces.IConfigurer)
-    implements(interfaces.IPluginObserver, inherit=True)
+    implements(interfaces.IDatasetForm)
+    implements(IDoi)
+    implements(interfaces.IFacets, inherit=True)
+    implements(interfaces.IPackageController, inherit=True)
     implements(interfaces.ITemplateHelpers)
     implements(interfaces.IValidators)
 
@@ -27,6 +32,7 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         from ckanext.orcid_datasets.logic.action import create, get, update
         actions = {
             u'contributor_create': create.contributor_create,
+            u'package_create': create.package_create,
             u'contributor_show': get.contributor_show,
             u'contributor_autocomplete': get.contributor_autocomplete,
             u'contributor_update': update.contributor_update,
@@ -52,8 +58,7 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         '''
         Called at the end of CKAN setup.
         '''
-        if model.package_table.exists():
-            contributor_model.contributor_table.create(checkfirst=True)
+        contributor_model.check_for_table()
 
     # IConfigurer
     def update_config(self, config):
@@ -63,30 +68,97 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         toolkit.add_template_directory(config, u'theme/templates')
         toolkit.add_resource(u'theme/fanstatic', u'ckanext-orcid-datasets')
 
-    # IPluginObserver
-    def before_load(self, plugin):
-        '''
-        Modifies the show/update package schemas to include a 'contributors' field.
-        '''
-        if interfaces.IDatasetForm.implemented_by(type(plugin)):
-            def _create_schema_wrapper(original_schema_method):
-                return lambda: self.create_package_schema(original_schema_method())
+    # IDatasetForm
+    def is_fallback(self):
+        idataset_plugins = [p for p in PluginImplementations(interfaces.IDatasetForm) if p.name != 'orcid_datasets']
+        no_idataset = len(idataset_plugins) == 0
+        if not no_idataset:
+            for p in idataset_plugins:
+                def _create_schema_wrapper(original_schema_method):
+                    return lambda: self.create_package_schema(original_schema_method())
 
-            def _show_schema_wrapper(original_schema_method):
-                return lambda: self.show_package_schema(original_schema_method())
+                def _show_schema_wrapper(original_schema_method):
+                    return lambda: self.show_package_schema(original_schema_method())
 
-            def _update_schema_wrapper(original_schema_method):
-                return lambda: self.update_package_schema(original_schema_method())
+                def _update_schema_wrapper(original_schema_method):
+                    return lambda: self.update_package_schema(original_schema_method())
 
-            plugin.create_package_schema = _create_schema_wrapper(plugin.create_package_schema)
-            plugin.show_package_schema = _show_schema_wrapper(plugin.show_package_schema)
-            plugin.update_package_schema = _update_schema_wrapper(plugin.update_package_schema)
-        return plugin
+                p.create_package_schema = _create_schema_wrapper(p.create_package_schema)
+                p.show_package_schema = _show_schema_wrapper(p.show_package_schema)
+                p.update_package_schema = _update_schema_wrapper(p.update_package_schema)
+        return no_idataset
+
+    def package_types(self):
+        return []
+
+    # IDoi
+    def build_metadata(self, pkg_dict, metadata_dict):
+        contributors = pkg_dict.get(u'contributors', None)
+        if contributors:
+            found_contributors = []
+            if isinstance(contributors, (str, unicode)):
+                try:
+                    contributors = json.loads(contributors)
+                except ValueError:
+                    pass
+            if isinstance(contributors, list):
+                get_contributor = toolkit.get_action(u'contributor_show')
+                for contributor_id in contributors:
+                    contributor = get_contributor({}, {
+                        u'id': contributor_id
+                        })
+                    _surname = contributor.get(u'surname', u'').encode(u'unicode-escape')
+                    _given = contributor.get(u'given_names', u'').encode(u'unicode-escape')
+                    _affiliations = contributor.get(u'affiliations', [])
+                    _orcid = contributor.get(u'orcid', None)
+                    contrib_metadata = {
+                        u'contributorName': u'{0}, {1}'.format(_surname, _given),
+                        u'givenName': _given,
+                        u'familyName': _surname,
+                        u'affiliation': _affiliations,
+                        }
+                    if _orcid is not None and _orcid != '':
+                        contrib_metadata[u'nameIdentifier'] = _orcid
+                    found_contributors.append(contrib_metadata)
+                metadata_dict[u'contributors'] = found_contributors
+        return metadata_dict
+
+    def metadata_to_xml(self, xml_dict, metadata):
+        if u'contributors' in metadata:
+            contributor_xml = []
+
+            for contributor in metadata[u'contributors']:
+                contributor[u'@contributorType'] = u'Researcher'
+                if u'nameIdentifier' in contributor:
+                    contributor[u'nameIdentifier']['@schemeURI'] = 'http://orcid.org'
+                    contributor[u'nameIdentifier']['@nameIdentifierScheme'] = 'ORCID'
+                contributor_xml.append(contributor)
+            xml_dict[u'resource'][u'contributors'] = {
+                u'contributor': contributor_xml,
+                }
+        return xml_dict
+
+    # IFacets
+    def dataset_facets(self, facets_dict, package_type):
+        facets_dict[u'contributors'] = toolkit._(u'Contributors')
+        return facets_dict
+
+    # IPackageController
+    def before_index(self, pkg_dict):
+        from_contributor_ids = toolkit.get_validator(u'from_contributor_ids')
+        try:
+            if u'contributors' in pkg_dict:
+                contrib_dict = from_contributor_ids(pkg_dict[u'contributors'])
+                pkg_dict[u'contributors'] = [u'{0}, {1}'.format(c[u'surname'], c['given_names']) for c in contrib_dict.values()]
+        except toolkit.Invalid:
+            pass
+        return pkg_dict
 
     # IValidators
     def get_validators(self):
         return {
-            'is_serialised_list': validators.is_serialised_list
+            u'is_serialised_list': validators.is_serialised_list,
+            u'from_contributor_ids': validators.from_contributor_ids
             }
 
     # ITemplateHelpers
@@ -111,9 +183,10 @@ class OrcidDatasetsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         ignore_missing = toolkit.get_validator(u'ignore_missing')
         convert_from_extras = toolkit.get_converter(u'convert_from_extras')
         is_serialised_list = toolkit.get_validator(u'is_serialised_list')
+        from_contributor_ids = toolkit.get_validator(u'from_contributor_ids')
         if schema is None:
             schema = super(OrcidDatasetsPlugin, self).show_package_schema()
-        schema[u'contributors'] = [convert_from_extras, ignore_missing, is_serialised_list]
+        schema[u'contributors'] = [convert_from_extras, ignore_missing, is_serialised_list, from_contributor_ids]
         return schema
 
     def update_package_schema(self, schema=None):

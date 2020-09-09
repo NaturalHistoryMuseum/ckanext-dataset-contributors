@@ -4,9 +4,16 @@
 # This file is part of ckanext-orcid-datasets
 # Created by the Natural History Museum in London, UK
 
+from ckanext.orcid_datasets.logic.common import parse_contributors
 from ckanext.orcid_datasets.model.crud import ContributorQ
 
 from ckan.plugins import toolkit
+
+
+@toolkit.chained_action
+def package_create(next_action, context, data_dict):
+    data_dict[u'contributors'] = parse_contributors(context, data_dict)
+    return next_action(context, data_dict)
 
 
 def contributor_create(context, data_dict):

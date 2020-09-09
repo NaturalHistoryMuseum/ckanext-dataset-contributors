@@ -31,8 +31,9 @@ def contributor_autocomplete(context, data_dict):
 
     filters = []
     for k, v in data_dict.items():
-        if v is not None and hasattr(Contributor, k) and isinstance(getattr(Contributor, k),
-                                                                    InstrumentedAttribute):
+        has_value = v is not None and v != u''
+        if has_value and hasattr(Contributor, k) and isinstance(getattr(Contributor, k),
+                                                                InstrumentedAttribute):
             filters.append(getattr(Contributor, k).ilike(u'%' + v + u'%'))
 
     portal_results = Session.query(Contributor).filter(and_(*filters)).limit(10).all()

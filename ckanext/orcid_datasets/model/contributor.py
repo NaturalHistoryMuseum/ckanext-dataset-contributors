@@ -8,7 +8,7 @@ from sqlalchemy import (Column, ForeignKey, Table, UnicodeText)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import backref, relation
 
-from ckan.model import DomainObject, User, meta
+from ckan.model import DomainObject, User, meta, package_table
 from ckan.model.types import make_uuid
 
 # this table stores contributors
@@ -38,3 +38,8 @@ meta.mapper(Contributor, contributor_table, properties={
                          primaryjoin=contributor_table.c.user_id.__eq__(User.id)
                          )
     })
+
+
+def check_for_table():
+    if package_table.exists():
+        contributor_table.create(checkfirst=True)
