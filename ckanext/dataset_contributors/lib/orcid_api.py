@@ -15,7 +15,7 @@ class OrcidApi(object):
     def __init__(self):
         self.key = toolkit.config.get(u'ckanext.dataset_contributors.orcid_key')
         self.secret = toolkit.config.get(u'ckanext.dataset_contributors.orcid_secret')
-        self._debug = toolkit.config.get(u'ckanext.dataset_contributors.debug', 'true').lower() == 'true'
+        self._debug = str(toolkit.config.get(u'ckanext.dataset_contributors.debug', 'true')).lower() == 'true'
 
     @property
     def conn(self):

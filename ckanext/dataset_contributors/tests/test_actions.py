@@ -125,7 +125,8 @@ class TestUpdateActions(TestBase):
         self.data_factory().refresh()
         self.contributor1 = ContributorQ.create(**helpers.contributor1)
         self.contributor2 = ContributorQ.create(**helpers.contributor2)
-        self.pkg = self.data_factory().package(u'testpackage', contributors=[self.contributor1.id])
+        self.pkg = self.data_factory().package(u'testpackage',
+                                               contributors=json.dumps([self.contributor1.id]))
 
     def test_update_actions_registered(self):
         toolkit.get_action(u'package_update')
@@ -215,9 +216,7 @@ class TestUpdateActions(TestBase):
         new_contribs = ContributorQ.search(ContributorQ.m.surname == u'D')
         nose.tools.assert_equal(len(new_contribs), 0)
 
-    def test_package_update_adds_to_extras(self):
-        # FIXME: unskip when package_show is fixed
-        raise nose.SkipTest('package_show is broken, skipping for now')
+    def test_package_update_adds_to(self):
         package_update = toolkit.get_action(u'package_update')
         package_show = toolkit.get_action(u'package_show')
         update_dict = {
@@ -232,15 +231,12 @@ class TestUpdateActions(TestBase):
             }
         self.pkg[u'contributors'] = json.dumps(update_dict)
         package_update(self.action_context, self.pkg)
-        # this will fail if package_show does not use the updated schema
-        nose.tools.assert_list_equal([self.contributor2.id, self.contributor1.id],
-                                     package_show(self.action_context, {
-                                         u'id': self.pkg[u'id']
-                                         }).get(u'contributors', []))
+        new_contributors = [k for k, v in sorted(package_show(self.action_context, {
+            u'id': self.pkg[u'id']
+            }).get(u'contributors', {}).items(), key=lambda x: x[1][u'order'])]
+        nose.tools.assert_list_equal([self.contributor2.id, self.contributor1.id], new_contributors)
 
     def test_package_update_removes(self):
-        # FIXME: unskip when package_show is fixed
-        raise nose.SkipTest('package_show is broken, skipping for now')
         package_update = toolkit.get_action(u'package_update')
         package_show = toolkit.get_action(u'package_show')
         update_dict = {
@@ -255,11 +251,10 @@ class TestUpdateActions(TestBase):
             }
         self.pkg[u'contributors'] = json.dumps(update_dict)
         package_update(self.action_context, self.pkg)
-        # this will fail if package_show does not use the updated schema
-        nose.tools.assert_list_equal([self.contributor2.id],
-                                     package_show(self.action_context, {
-                                         u'id': self.pkg[u'id']
-                                         }).get(u'contributors', []))
+        new_contributors = [k for k, v in sorted(package_show(self.action_context, {
+            u'id': self.pkg[u'id']
+            }).get(u'contributors', {}).items(), key=lambda x: x[1][u'order'])]
+        nose.tools.assert_list_equal([self.contributor2.id], new_contributors)
 
     def test_contributor_update(self):
         contributor_update = toolkit.get_action(u'contributor_update')
@@ -273,7 +268,9 @@ class TestUpdateActions(TestBase):
         nose.tools.assert_not_equal(name_before, name_after)
         nose.tools.assert_equal(u'X', name_after)
         nose.tools.assert_is_instance(updated1, dict)
-        updated2 = contributor_update(self.action_context, {u'given_names': u'Y'})
+        updated2 = contributor_update(self.action_context, {
+            u'given_names': u'Y'
+            })
         nose.tools.assert_is_none(updated2)
 
     def test_contributor_orcid_update(self):

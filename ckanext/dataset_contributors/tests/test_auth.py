@@ -58,8 +58,8 @@ class TestUpdateAuth(TestAuthBase):
             toolkit.check_access(u'contributor_update', self.user_context, {})
         toolkit.check_access(u'contributor_update', self.sysadmin_context, {})
 
-    def test_contributor_update_orcid(self):
+    def test_contributor_orcid_update(self):
         with nose.tools.assert_raises(toolkit.NotAuthorized):
-            toolkit.check_access(u'contributor_update_orcid', self.anon_context, {})
-        toolkit.check_access(u'contributor_update_orcid', self.user_context, {})
-        toolkit.check_access(u'contributor_update_orcid', self.sysadmin_context, {})
+            toolkit.check_access(u'contributor_orcid_update', self.anon_context, {})
+        toolkit.check_access(u'contributor_orcid_update', self.user_context, {})
+        toolkit.check_access(u'contributor_orcid_update', self.sysadmin_context, {})

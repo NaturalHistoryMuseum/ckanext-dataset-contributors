@@ -29,16 +29,16 @@ class TestOrcidApi(TestBase):
     def test_gets_credentials_when_present(self):
         test_key = u'test-key-value'
         test_secret = u'test-secret-value'
-        self._set_config_value(u'key', True, test_key)
-        self._set_config_value(u'secret', True, test_secret)
+        self._set_config_value(u'orcid_key', True, test_key)
+        self._set_config_value(u'orcid_secret', True, test_secret)
         api = OrcidApi()
         nose.tools.assert_equal(test_key, api.key)
         nose.tools.assert_equal(test_secret, api.secret)
         self.config.reset()
 
     def test_gets_no_credentials_when_absent(self):
-        self._set_config_value(u'key', False)
-        self._set_config_value(u'secret', False)
+        self._set_config_value(u'orcid_key', False)
+        self._set_config_value(u'orcid_secret', False)
         api = OrcidApi()
         nose.tools.assert_is_none(api.key)
         nose.tools.assert_is_none(api.secret)
@@ -59,8 +59,8 @@ class TestOrcidApi(TestBase):
         self.config.reset()
 
     def test_cannot_authenticate_without_credentials(self):
-        self._set_config_value(u'key', False)
-        self._set_config_value(u'secret', False)
+        self._set_config_value(u'orcid_key', False)
+        self._set_config_value(u'orcid_secret', False)
         with nose.tools.assert_raises(Exception):
             api_conn = OrcidApi().conn
         self.config.reset()
@@ -80,7 +80,7 @@ class TestOrcidApi(TestBase):
         nose.tools.assert_is_none(api.read_token)
 
     def test_read_token_fails_without_credentials(self):
-        self._set_config_value(u'key', False)
+        self._set_config_value(u'orcid_key', False)
         with nose.tools.assert_raises(Exception):
             api_conn = OrcidApi().read_token
         self.config.reset()

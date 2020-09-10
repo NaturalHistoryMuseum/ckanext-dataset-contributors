@@ -12,8 +12,12 @@ from ckan.plugins import toolkit
 
 
 def parse_contributors(context, data_dict):
-    contributors = json.loads(data_dict.get(u'contributors', u'{}'))
+    contributors = data_dict.get(u'contributors', u'{}')
+    if isinstance(contributors, (str, unicode)):
+        # allow serialised and non-serialised input
+        contributors = json.loads(contributors)
     if isinstance(contributors, list):
+        # can just pass a list of ids in if no updates/creation needed
         return data_dict.get(u'contributors')
     new_contributors = [c for _, c in contributors.items() if c.get('new', False)]
     existing_contributors = [c for _, c in contributors.items() if not c.get('new', False)]
