@@ -4,5 +4,5 @@ mock
 httpretty
 coveralls
 -e git+https://github.com/NaturalHistoryMuseum/ckantest.git#egg=ckantest
-requests==2.13.1
+-U --force-reinstall requests
 spacy
