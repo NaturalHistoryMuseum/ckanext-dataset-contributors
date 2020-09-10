@@ -91,6 +91,11 @@ class TestGetActions(TestBase):
         nose.tools.assert_equal(len(results[u'orcid']), 0)
 
     def test_contributor_autocomplete_orcid(self):
+        api = helpers.skip_without_credentials()
+        self.config.update({
+            u'ckanext.dataset_contributors.orcid_key': api.key,
+            u'ckanext.dataset_contributors.orcid_secret': api.secret,
+            })
         contributor_autocomplete = toolkit.get_action(u'contributor_autocomplete')
         results1 = contributor_autocomplete(self.action_context, {
             u'include_orcid': True,
@@ -274,7 +279,11 @@ class TestUpdateActions(TestBase):
         nose.tools.assert_is_none(updated2)
 
     def test_contributor_orcid_update(self):
-        helpers.skip_without_credentials()
+        api = helpers.skip_without_credentials()
+        self.config.update({
+            u'ckanext.dataset_contributors.orcid_key': api.key,
+            u'ckanext.dataset_contributors.orcid_secret': api.secret,
+            })
         contributor_orcid_update = toolkit.get_action(u'contributor_orcid_update')
         name_before = ContributorQ.read(self.contributor1.id).given_names
         update_dict = {

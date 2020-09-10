@@ -6,7 +6,7 @@
 
 import orcid
 import requests
-from werkzeug.utils import cached_property
+from paste.deploy.converters import asbool
 
 from ckan.plugins import toolkit
 
@@ -15,7 +15,7 @@ class OrcidApi(object):
     def __init__(self):
         self.key = toolkit.config.get(u'ckanext.dataset_contributors.orcid_key')
         self.secret = toolkit.config.get(u'ckanext.dataset_contributors.orcid_secret')
-        self._debug = str(toolkit.config.get(u'ckanext.dataset_contributors.debug', 'true')).lower() == 'true'
+        self._debug = asbool(toolkit.config.get(u'ckanext.dataset_contributors.debug', True))
 
     @property
     def conn(self):
@@ -65,7 +65,8 @@ class OrcidApi(object):
         return {
             u'surname': names.get(u'family-name', {}).get(u'value', u''),
             u'given_names': names.get(u'given-names', {}).get(u'value', u''),
-            u'affiliations': list(set([e.get(u'organization', {}).get(u'name', None) for e in employments if
-                              e.get(u'organization', {}).get(u'name', None) is not None])),
+            u'affiliations': list(
+                set([e.get(u'organization', {}).get(u'name', None) for e in employments if
+                     e.get(u'organization', {}).get(u'name', None) is not None])),
             u'orcid': orcid_record.get(u'orcid-identifier', {}).get(u'path', u'')
             }
