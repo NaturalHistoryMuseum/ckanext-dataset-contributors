@@ -8,7 +8,12 @@ import json
 
 from ckanext.dataset_contributors.lib import template_helpers, validators
 from ckanext.dataset_contributors.model import contributor as contributor_model
-from ckanext.doi.interfaces import IDoi
+try:
+    from ckanext.doi.interfaces import IDoi
+    doi_available = True
+except ImportError:
+    doi_available = False
+
 
 from ckan.plugins import PluginImplementations, SingletonPlugin, implements, interfaces, toolkit
 
@@ -21,11 +26,12 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     implements(interfaces.IConfigurable)
     implements(interfaces.IConfigurer)
     implements(interfaces.IDatasetForm)
-    implements(IDoi)
     implements(interfaces.IFacets, inherit=True)
     implements(interfaces.IPackageController, inherit=True)
     implements(interfaces.ITemplateHelpers)
     implements(interfaces.IValidators)
+    if doi_available:
+        implements(IDoi)
 
     # IActions
     def get_actions(self):
@@ -94,6 +100,8 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
     # IDoi
     def build_metadata(self, pkg_dict, metadata_dict):
+        if not doi_available:
+            return metadata_dict
         contributors = pkg_dict.get(u'contributors', None)
         if contributors:
             found_contributors = []
@@ -114,8 +122,6 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
                     _orcid = contributor.get(u'orcid', None)
                     contrib_metadata = {
                         u'contributorName': u'{0}, {1}'.format(_surname, _given),
-                        u'givenName': _given,
-                        u'familyName': _surname,
                         u'affiliation': _affiliations,
                         }
                     if _orcid is not None and _orcid != '':
@@ -125,6 +131,8 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         return metadata_dict
 
     def metadata_to_xml(self, xml_dict, metadata):
+        if not doi_available:
+            return xml_dict
         if u'contributors' in metadata:
             contributor_xml = []
 
