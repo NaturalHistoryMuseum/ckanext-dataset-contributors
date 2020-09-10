@@ -8,12 +8,12 @@ import json
 
 from ckanext.dataset_contributors.lib import template_helpers, validators
 from ckanext.dataset_contributors.model import contributor as contributor_model
+from paste.deploy.converters import asbool
 try:
     from ckanext.doi.interfaces import IDoi
     doi_available = True
 except ImportError:
     doi_available = False
-
 
 from ckan.plugins import PluginImplementations, SingletonPlugin, implements, interfaces, toolkit
 
@@ -160,15 +160,15 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
     # IPackageController
     def before_index(self, pkg_dict):
-        enable_faceting = toolkit.config.get(u'ckanext.dataset_contributors.enable_faceting',
-                                             'false').lower() == 'true'
+        enable_faceting = asbool(toolkit.config.get(u'ckanext.dataset_contributors.enable_faceting',
+                                                    False))
         if enable_faceting:
             from_contributor_ids = toolkit.get_validator(u'from_contributor_ids')
+            contributors = pkg_dict.get(u'contributors', [])
             try:
-                if u'contributors' in pkg_dict:
-                    contrib_dict = from_contributor_ids(pkg_dict[u'contributors'])
-                    pkg_dict[u'contributors'] = [u'{0}, {1}'.format(c[u'surname'], c['given_names'])
-                                                 for c in contrib_dict.values()]
+                contrib_dict = from_contributor_ids(contributors)
+                pkg_dict[u'contributors'] = [u'{0}, {1}'.format(c[u'surname'], c['given_names'])
+                                             for c in contrib_dict.values()]
             except toolkit.Invalid:
                 pass
         return pkg_dict

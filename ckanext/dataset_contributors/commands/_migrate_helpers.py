@@ -4,6 +4,7 @@
 # This file is part of ckanext-dataset-contributors
 # Created by the Natural History Museum in London, UK
 from __future__ import division
+
 import itertools
 from collections import Counter
 
@@ -58,7 +59,6 @@ class Parser(object):
         tokens = [t for t in parsed]
         pos = Counter([t.pos_ for t in tokens])
         if len(tokens) == 0:
-            print(line)
             return []
         pc_proper_nouns = pos.get('PROPN', 0) / len(tokens)
         if pc_proper_nouns < 0.5:
@@ -279,13 +279,21 @@ class Combiner(object):
             packages = [p for x in g for p in x['packages']]
             affiliations = list(set([a for x in g for a in x['affiliations']]))
             if use_orcid:
-                results = api.search(surname_q=name['surname'], given_q=name['given_names']).get(u'result', [])
-                display_name = ' '.join([name['given_names'], name['surname']])
+                display_name = u' '.join([name['given_names'], name['surname']])
+                base_q = u'Do any of these ORCID results match "{0}" ({1})?'
+                try:
+                    question = base_q.format(display_name, u', '.join(affiliations))
+                    results = api.search(surname_q=name['surname'],
+                                         given_q=name['given_names']).get(u'result', [])
+                except Exception as e:
+                    print('\nError, skipping:')
+                    print(display_name)
+                    print(e)
+                    results = []
                 if len(results) > 0:
-                    results = [api.as_contributor_record(api.read(r[u'orcid-identifier'][u'path'])) for r in results]
-                    selection = multi_choice(
-                        'Do any of these ORCID results match "{0}"?'.format(display_name),
-                        results + ['No'], default=len(results))
+                    results = [api.as_contributor_record(api.read(r[u'orcid-identifier'][u'path']))
+                               for r in results]
+                    selection = multi_choice(question, results + ['No'], default=len(results))
                     if selection != 'No':
                         d = selection
                         d['packages'] = packages

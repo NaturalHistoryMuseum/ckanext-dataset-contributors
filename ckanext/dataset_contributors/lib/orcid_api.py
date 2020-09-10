@@ -7,6 +7,7 @@
 import orcid
 import requests
 from paste.deploy.converters import asbool
+from werkzeug.utils import cached_property
 
 from ckan.plugins import toolkit
 
@@ -17,13 +18,13 @@ class OrcidApi(object):
         self.secret = toolkit.config.get(u'ckanext.dataset_contributors.orcid_secret')
         self._debug = asbool(toolkit.config.get(u'ckanext.dataset_contributors.debug', True))
 
-    @property
+    @cached_property
     def conn(self):
         if self.key is None or self.secret is None:
             raise Exception(toolkit._(u'ORCID API credentials not supplied.'))
         return orcid.PublicAPI(self.key, self.secret, sandbox=self._debug)
 
-    @property
+    @cached_property
     def read_token(self):
         if self.key is None or self.secret is None:
             raise Exception(toolkit._(u'ORCID API credentials not supplied.'))

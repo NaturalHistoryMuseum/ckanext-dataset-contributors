@@ -53,6 +53,8 @@ class ContributorMigrateCommand(toolkit.CkanCommand):
         print(u'{0} values found.'.format(len(pkgs_with_contribs)))
         all_found_contribs = []
         for pkg in pkgs_with_contribs:
+            if pkg.value is None:
+                continue
             for parser_group in Parser.run(pkg.value, pkg):
                 all_found_contribs += parser_group.contribs
 
@@ -73,7 +75,9 @@ class ContributorMigrateCommand(toolkit.CkanCommand):
         for package_id, contributor_ids in by_package.items():
             package_extra = Session.query(PackageExtra).filter(
                 PackageExtra.package_id == package_id, PackageExtra.key == u'contributors')
-            package_extra.update({'value': json.dumps(contributor_ids)})
+            package_extra.update({
+                'value': json.dumps(contributor_ids)
+                })
             Session.commit()
 
         print(u'Added {0} new contributors.'.format(len(combined)))
