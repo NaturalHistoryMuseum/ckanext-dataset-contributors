@@ -75,10 +75,29 @@
 
 .contributor-search {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr min-content;
-    grid-gap: 5px 10px;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
     position: relative;
     margin-bottom: 10px;
+    align-items: end;
+}
+
+.contributor-search .grid-span {
+    grid-column-end: span 2;
+}
+
+.contributor-search .grid-cell {
+    display: grid;
+}
+
+@media (min-width: 1200px) {
+    .contributor-search {
+        grid-template-columns: 1fr 1fr 1fr min-content;
+    }
+
+    .contributor-search .grid-span {
+        grid-column-end: span 4;
+    }
 }
 
 .contributor-search > label {
@@ -99,10 +118,6 @@
 .contributor-search-buttons .btn {
     top: unset;
     justify-self: end;
-}
-
-.contributor-search .grid-span {
-    grid-column-end: span 4;
 }
 
 .hideme {

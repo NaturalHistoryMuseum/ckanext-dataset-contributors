@@ -4,7 +4,7 @@
 
 {% block package_custom_fields_contributors %}
     <div class="form-group control-medium">
-        <b>{{ _('Contributors') }}:</b> {{ form.info("Enter a list of additional contributors, one per line. If you wish to add affiliations, please include in parenthesis.", inline=True) }}
+        <b>{{ _('Contributors') }}:</b>
         <div id="contributor-rows">
         </div>
         {# JS template block #} {# warning: all instances of the string 'new' will be replaced #}
@@ -76,13 +76,18 @@
         <label for="contributor-search-options"
                class="screenreader">{{ _('Contributor suggestions') }}</label>
         <div class="contributor-search">
-            <label for="contributor-search-surname-input">{{ _('Search by surname') }}</label>
-            <label for="contributor-search-given-input">{{ _('Search by given name(s)') }}</label>
-            <label for="contributor-search-orcid-input">{{ _('Search by ORCID') }}</label>
-            <span></span>
-            <input type="text" id="contributor-search-surname-input">
-            <input type="text" id="contributor-search-given-input">
-            <input type="text" id="contributor-search-orcid-input">
+            <div class="grid-cell">
+                <label for="contributor-search-surname-input">{{ _('Search by surname') }}</label>
+                <input type="text" id="contributor-search-surname-input">
+            </div>
+            <div class="grid-cell">
+                <label for="contributor-search-given-input">{{ _('Search by given name(s)') }}</label>
+                <input type="text" id="contributor-search-given-input">
+            </div>
+            <div class="grid-cell">
+                <label for="contributor-search-orcid-input">{{ _('Search by ORCID') }}</label>
+                <input type="text" id="contributor-search-orcid-input">
+            </div>
             <div class="btn btn-primary" id="contributor-search-button">
                 <i class="fas fa-search"></i>Search
             </div>
