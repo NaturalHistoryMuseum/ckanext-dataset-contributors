@@ -159,16 +159,17 @@ function updateRow(rowElement, rowContent, skip) {
 $(document).ready(function () {
     // CONSTANTS/SELECTORS =========================================================================
     // contains the displayed rows
-    let container      = $('#contributor-rows');
+    let container        = $('#contributor-rows');
     // a *string* of template HTML
-    let templateHtml   = $('#contributor-new-edit-row')[0].outerHTML;
-    let searchBox      = $('#contributor-search-input');
-    let orcidSearchBox = $('#contributor-search-orcid-input');
-    let orcidCheck     = $('#contributor-search-orcid');
-    let selectBox      = $('#contributor-search-options');
-    let portalGroup    = $('#contributor-search-options #portal-group');
-    let orcidGroup     = $('#contributor-search-options #orcid-group');
-    let loader         = $('#contributor-search-loading')
+    let templateHtml     = $('#contributor-new-edit-row')[0].outerHTML;
+    let surnameSearchBox = $('#contributor-search-surname-input');
+    let givenSearchBox   = $('#contributor-search-given-input')
+    let orcidSearchBox   = $('#contributor-search-orcid-input');
+    let orcidCheck       = $('#contributor-search-orcid');
+    let selectBox        = $('#contributor-search-options');
+    let portalGroup      = $('#contributor-search-options #portal-group');
+    let orcidGroup       = $('#contributor-search-options #orcid-group');
+    let loader           = $('#contributor-search-loading')
 
     // FUNCTIONS ===================================================================================
     // generic function to add a new row/contributor to the UI, either from the existing list at
@@ -240,7 +241,8 @@ $(document).ready(function () {
             redirect:    'follow',
             referrer:    'no-referrer',
             body:        JSON.stringify({
-                                            'surname':       searchBox.val(),
+                                            'surname':       surnameSearchBox.val(),
+                                            'given_names':   givenSearchBox.val(),
                                             'orcid':         orcidSearchBox.val(),
                                             'include_orcid': includeOrcid
                                         }),

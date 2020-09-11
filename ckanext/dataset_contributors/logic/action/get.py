@@ -42,7 +42,9 @@ def contributor_autocomplete(context, data_dict):
 
     if include_orcid:
         api = OrcidApi()
-        _orcid_search = api.search(data_dict.get(u'surname', None), data_dict.get(u'orcid', None))
+        _orcid_search = api.search(surname_q=data_dict.get(u'surname', None),
+                                   given_q=data_dict.get('given_names', None),
+                                   orcid_q=data_dict.get(u'orcid', None))
         n = _orcid_search.get(u'num-found', 0)
         records = _orcid_search.get('result', [])
         orcid_ids = []

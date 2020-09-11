@@ -74,10 +74,12 @@
         <label for="contributor-search-options"
                class="screenreader">{{ _('Contributor suggestions') }}</label>
         <div class="contributor-search">
-            <label for="contributor-search-input">{{ _('Search by surname') }}</label>
+            <label for="contributor-search-surname-input">{{ _('Search by surname') }}</label>
+            <label for="contributor-search-given-input">{{ _('Search by given name(s)') }}</label>
             <label for="contributor-search-orcid-input">{{ _('Search by ORCID') }}</label>
             <span></span>
-            <input type="text" id="contributor-search-input">
+            <input type="text" id="contributor-search-surname-input">
+            <input type="text" id="contributor-search-given-input">
             <input type="text" id="contributor-search-orcid-input">
             <div class="btn btn-primary" id="contributor-search-button">
                 <i class="fas fa-search"></i>Search
