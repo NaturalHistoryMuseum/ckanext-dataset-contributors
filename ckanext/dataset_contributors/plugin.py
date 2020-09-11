@@ -184,7 +184,7 @@ class DatasetContributorsPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             u'as_string': template_helpers.as_string,
-            u'contributor_details': template_helpers.contributor_details,
+            u'convert_to_contributor_details': template_helpers.convert_to_contributor_details,
             u'can_edit': template_helpers.can_edit
             }
 

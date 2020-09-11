@@ -1,6 +1,6 @@
 {% ckan_extends %}
 
-{% set contributors = g.pkg_dict.get('contributors', []).values() | sort(attribute='order') %}
+{% set contributors = h.convert_to_contributor_details(g.pkg_dict.get('contributors', {})).values() | sort(attribute='order') %}
 {% set limit = 3 %}
 
 {% block contributors_row %}
