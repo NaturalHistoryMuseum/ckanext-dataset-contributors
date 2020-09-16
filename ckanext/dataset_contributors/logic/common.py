@@ -8,6 +8,7 @@ import json
 
 from ckanext.dataset_contributors.model.crud import ContributorQ
 
+from ckan.model import Session
 from ckan.plugins import toolkit
 
 
@@ -26,7 +27,13 @@ def parse_contributors(context, data_dict):
         if c.get(u'delete', False):
             continue
         if c.get(u'update', False):
-            toolkit.get_action(u'contributor_update')(context, c)
+            try:
+                toolkit.get_action(u'contributor_update')(context, c)
+            except Exception as e:
+                Session.rollback()
+                raise toolkit.ValidationError({
+                    u'contributors': [u'Contributor {0} could not be updated.'.format(c.get(u'order', 0) + 1)]
+                    })
         package_contributors.append(c)
     for c in new_contributors:
         if c.get(u'delete', False):
@@ -38,7 +45,13 @@ def parse_contributors(context, data_dict):
             if in_database is not None:
                 new_contributor = in_database.as_dict()
         if new_contributor is None:
-            new_contributor = toolkit.get_action(u'contributor_create')(context, c)
+            try:
+                new_contributor = toolkit.get_action(u'contributor_create')(context, c)
+            except Exception as e:
+                Session.rollback()
+                raise toolkit.ValidationError({
+                    u'contributors': [u'Contributor {0} could not be added.'.format(c.get(u'order', 0) + 1)]
+                    })
         new_contributor[u'order'] = c.get(u'order', len(package_contributors))
         package_contributors.append(new_contributor)
 
